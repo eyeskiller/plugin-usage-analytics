@@ -2,6 +2,7 @@ import db from '@/lib/db';
 import Link from 'next/link';
 import LogoutButton from '@/app/components/LogoutButton';
 import VersionManager from '@/app/components/VersionManager';
+import DeletePluginButton from '@/app/components/DeletePluginButton';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
@@ -63,6 +64,7 @@ export default async function PluginDetails({ params }) {
           <h1 style={{ display: 'inline-block', margin: 0 }}>{pluginName} Analytics</h1>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+          <DeletePluginButton pluginName={pluginName} />
           <LogoutButton />
         </div>
       </header>
