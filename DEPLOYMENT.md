@@ -18,6 +18,9 @@ sudo dnf module enable nodejs:20 -y
 # Install Node.js
 sudo dnf install nodejs -y
 
+# Install build tools (required for better-sqlite3)
+sudo dnf install gcc gcc-c++ make -y
+
 # Install PM2 globally
 sudo npm install -g pm2
 ```
