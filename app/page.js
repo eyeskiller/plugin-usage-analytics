@@ -1,5 +1,6 @@
 import db from '@/lib/db';
 import LogoutButton from './components/LogoutButton';
+import LockToggle from './components/LockToggle';
 import Link from 'next/link';
 
 export const dynamic = 'force-dynamic';
@@ -25,6 +26,10 @@ export default async function Dashboard() {
     LIMIT 10
   `).all();
 
+  // Get lock state
+  const lockRow = db.prepare('SELECT value FROM settings WHERE key = ?').get('registration_locked');
+  const isLocked = lockRow ? lockRow.value === 'true' : false;
+
   return (
     <div className="container">
       <header className="header">
@@ -34,6 +39,7 @@ export default async function Dashboard() {
             <div style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: 'var(--success)' }}></div>
             <span style={{ fontSize: '0.875rem', fontWeight: 500 }}>System Online</span>
           </div>
+          <LockToggle initialLocked={isLocked} />
           <LogoutButton />
         </div>
       </header>

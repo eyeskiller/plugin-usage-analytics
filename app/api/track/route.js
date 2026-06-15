@@ -26,6 +26,20 @@ export async function POST(request) {
       );
     }
 
+    // Check if system is locked
+    const lockRow = db.prepare('SELECT value FROM settings WHERE key = ?').get('registration_locked');
+    if (lockRow && lockRow.value === 'true') {
+      // Check if plugin already exists in plugin_metadata or events
+      const existsMeta = db.prepare('SELECT 1 FROM plugin_metadata WHERE plugin_name = ?').get(plugin_name);
+      if (!existsMeta) {
+        const existsEvent = db.prepare('SELECT 1 FROM events WHERE plugin_name = ? LIMIT 1').get(plugin_name);
+        if (!existsEvent) {
+          console.warn(`Blocked registration attempt for unknown plugin: ${plugin_name}`);
+          return NextResponse.json({ error: 'Plugin registration is locked.' }, { status: 403 });
+        }
+      }
+    }
+
     const stmt = db.prepare(`
       INSERT INTO events (
         server_uuid,
