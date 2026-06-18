@@ -50,6 +50,19 @@ export default async function PluginDetails({ params }) {
     LIMIT 20
   `).all(pluginName);
 
+  // Servers list
+  const serversList = db.prepare(`
+    SELECT server_uuid, 
+           MAX(created_at) as last_seen, 
+           MAX(plugin_version) as plugin_version,
+           MAX(server_version) as server_version,
+           MAX(server_software) as server_software
+    FROM events 
+    WHERE plugin_name = ? 
+    GROUP BY server_uuid 
+    ORDER BY last_seen DESC
+  `).all(pluginName);
+
   // Get current latest version from metadata
   const metaRow = db.prepare('SELECT latest_version FROM plugin_metadata WHERE plugin_name = ?').get(pluginName);
   const currentLatestVersion = metaRow ? metaRow.latest_version : '';
@@ -153,6 +166,42 @@ export default async function PluginDetails({ params }) {
                     <td>{event.server_software || '-'}</td>
                     <td>{event.java_version || '-'}</td>
                     <td>{event.player_count !== null ? event.player_count : '-'}</td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div className="glass-panel" style={{ padding: '1.5rem', marginTop: '1.5rem' }}>
+        <h2 style={{ marginBottom: '1.5rem', fontSize: '1.25rem' }}>Installed Servers</h2>
+        <div className="data-table-container">
+          <table>
+            <thead>
+              <tr>
+                <th>Server UUID</th>
+                <th>Last Seen</th>
+                <th>Plugin Version</th>
+                <th>MC Version</th>
+                <th>Software</th>
+              </tr>
+            </thead>
+            <tbody>
+              {serversList.length === 0 ? (
+                <tr>
+                  <td colSpan="5" style={{ textAlign: 'center', color: 'var(--text-muted)' }}>No servers found.</td>
+                </tr>
+              ) : (
+                serversList.map(server => (
+                  <tr key={server.server_uuid}>
+                    <td style={{ fontFamily: 'monospace' }}>{server.server_uuid}</td>
+                    <td style={{ color: 'var(--text-muted)', fontSize: '0.875rem' }}>
+                      {new Date(server.last_seen).toLocaleString()}
+                    </td>
+                    <td>{server.plugin_version || '-'}</td>
+                    <td>{server.server_version || '-'}</td>
+                    <td>{server.server_software || '-'}</td>
                   </tr>
                 ))
               )}
